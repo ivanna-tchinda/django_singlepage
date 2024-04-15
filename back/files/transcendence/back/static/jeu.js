@@ -18,7 +18,6 @@ setTimeout(function() {
 }, 1000);
 
 function startCanva() {
-    
     game = {
         player: {
             score: 0

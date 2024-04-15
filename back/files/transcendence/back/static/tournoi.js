@@ -10,8 +10,8 @@ let playersArr2;
 var game;
 var anim;
 let canvas2;
-let playerName1;
-let playerName2;
+var playerName1;
+var playerName2;
 let nextbtn;
 let it = 0;
 let winnersArr = [];
@@ -27,7 +27,6 @@ setTimeout(function() {
     btn_participate = document.getElementById("btn-participer");
     loginForm = document.getElementById("loginForm");
     username = document.getElementById("username");
-    btn = document.getElementById("btn-1");
     if (launchTornament && username && btn_participate && loginForm)  {
         loginForm.addEventListener('submit', function(e) {
           participateTournament(e);
@@ -158,27 +157,55 @@ function generatePlayer(arr, id){
 }
 
 function loadGamePage(player1, player2){
-  const request = new XMLHttpRequest();
-  const container = document.getElementById("container");
-  request.open("GET", "pages/jeu/index.html");
-  request.send();
-  request.onload = function()
-  {
-    if(request.status == 200)
-      container.innerHTML = request.responseText;
-    setTimeout(function() {
-      canvas2 = document.getElementById("canvas");
-      playerName1 = document.getElementById("joueur1");
-      playerName2 = document.getElementById("joueur2");
-      console.log("loading...");
-      if (canvas2 && playerName1 && playerName2) {
-        playerName1.innerHTML = player1;
-        playerName2.innerHTML = player2;
-        console.log("loaded...");
+  //Creer de nouveaux elements pour afficher le jeu d'un tournoi
+
+    //boutons start et stop
+  var btn_start = document.createElement("button");
+  var btn_stop = document.createElement("button");
+  btn_start.setAttribute("id", "start-game")
+  btn_stop.setAttribute("id", "stop-game")
+  btn_start.innerHTML = "start"
+  btn_stop.innerHTML = "stop"
+
+    //noms des joueurs
+  var playerName1 = document.createElement("p");
+  var playerName2 = document.createElement("p");
+  playerName1.setAttribute("id", "joueur1")
+  playerName2.setAttribute("id", "joueur2")
+  playerName1.innerHTML = player1;
+  playerName2.innerHTML = player2;
+
+    //les scores des joueurs
+  var player_score = document.createElement("em")
+  var computer_score = document.createElement("em")
+  player_score.innerHTML = "0";
+  computer_score.innerHTML = "0";
+  player_score.setAttribute("id", "player-score");
+  computer_score.setAttribute("id", "computer-score");
+
+    //un canva pour le jeu
+  var newCanvas = document.createElement("canvas");
+  newCanvas.setAttribute("id", "canvas3");
+  newCanvas.setAttribute("width", "640");
+  newCanvas.setAttribute("height", "480");
+
+  //Placer ces elements dans div-jeu
+  var jeu_div = document.getElementById("div-jeu");
+  jeu_div.appendChild(playerName1);
+  jeu_div.appendChild(player_score);
+  jeu_div.appendChild(playerName2);
+  jeu_div.appendChild(computer_score);
+  jeu_div.appendChild(btn_start);
+  jeu_div.appendChild(btn_stop);
+  jeu_div.appendChild(newCanvas);
+
+  setTimeout(function() {
+      console.log("loading..." + newCanvas + " " + playerName1.innerHTML + " " + playerName2.innerHTML);
+      if (newCanvas && playerName1 && playerName2) {
+        console.log("loaded!");
         startCanva();
       }
     }, 100);
-  }
 }
 
 
@@ -196,6 +223,8 @@ function begin_tornaments() {
 }
 
 function displayWin(score1, score2) {
+  playerName1 = document.getElementById("joueur1");
+  playerName2 = document.getElementById("joueur2");
   const element = document.getElementById("jeu-div");
   // element.remove();
   
@@ -209,7 +238,7 @@ function displayWin(score1, score2) {
   newBtn.setAttribute("id", "next-btn");
 
 
-  const username = document.getElementById("container");
+  const username = document.getElementById("div-jeu");
   if(score1 > 2)
   {
     newUser.innerHTML = playerName1.innerHTML + " HAS WON";
@@ -227,14 +256,25 @@ function displayWin(score1, score2) {
   username.appendChild(newUser);
   username.appendChild(newBtn);
 
-  setTimeout(() => {
-    
-  }, 10000);
+  var btn_start = document.getElementById("start-game");
+  var btn_stop = document.getElementById("stop-game");
+  var playerName1 = document.getElementById("joueur1");
+  var playerName2 = document.getElementById("joueur2");
+  var player_score = document.getElementById("player-score")
+  var computer_score = document.getElementById("computer-score")
+  var newCanvas = document.getElementById("canvas3");
+  btn_start.remove();
+  btn_stop.remove();
+  playerName1.remove();
+  playerName2.remove();
+  player_score.remove();
+  computer_score.remove();
+  newCanvas.remove();
   if(it < nb_games - 1)
   {
-    console.log("it: " + it + " nb_games: " + nb_games);
-    var nextbtn = document.getElementById("next-btn");
-    nextbtn.addEventListener('click', function() {
+    newBtn.addEventListener('click', function() {
+    newBtn.remove();
+        newUser.remove();
         oneGame(++it);
     });
   }
@@ -242,17 +282,17 @@ function displayWin(score1, score2) {
   {
     var nextbtn = document.getElementById("next-btn");
     nextbtn.addEventListener('click', function() {
-        winnersDisplay();
+      newUser.remove();
+      newBtn.remove();
+      nextbtn.remove()
+      winnersDisplay();
     });
   }
   
 }
 
 function winnersDisplay() {
-  const element = document.getElementById("jeu-div");
-  element.remove();
-
-  const elt = document.getElementById("container");
+  const elt = document.getElementById("div-jeu");
   
   const winnersUser = document.createElement("p");
   var newContent = document.createTextNode("Winners are: ");
@@ -269,7 +309,7 @@ function winnersDisplay() {
   elt.appendChild(winnersUser);
 }
 
-/* GAME PART */
+///////////////////////////////////////////////////////////* GAME PART *//////////////////////////////////////////////////
 
 function startCanva() {
     
@@ -293,11 +333,11 @@ function startCanva() {
     document.addEventListener('keydown', player2Move);
     // Mouse click event
     document.querySelector('#start-game').addEventListener('click', play);
-    // document.querySelector('#stop-game').addEventListener('click', stop);
+    document.querySelector('#stop-game').addEventListener('click', stop);
 }
 
 function draw() {
-    const canvas2 = document.getElementById("canvas");
+    canvas2 = document.getElementById("canvas3");
     var context = canvas2.getContext('2d');
 
     // Draw field
@@ -333,7 +373,7 @@ function changeDirection(playerPosition) {
 
 function playerMove(event) 
 {
-    canvas2 = document.getElementById("canvas");
+    canvas2 = document.getElementById("canvas3");
     if(event.code == 'ArrowDown' && game.player.y < canvas2.height - PLAYER_HEIGHT2)
         game.player.y += 20;
     else if(event.code == 'ArrowUp' && game.player.y > 0)
@@ -374,7 +414,7 @@ function collide(player) {
 }
 
 function ballMove() {
-  canvas2 = document.getElementById("canvas");
+  canvas2 = document.getElementById("canvas3");
     if(!canvas2)
       return;
     // Rebounds on top and bottom
@@ -395,7 +435,6 @@ function ballMove() {
 function play() {
     draw();
 
-    // computerMove(); //pour l'IA
     ballMove();
 
     anim = requestAnimationFrame(play);
@@ -408,8 +447,7 @@ function play() {
 }
 
 function reset() {
-  console.log("RESET");
-  canvas2 = document.getElementById("canvas");
+  canvas2 = document.getElementById("canvas3");
   // Set ball and players to the center
   game.ball.x = canvas2.width / 2;
   game.ball.y = canvas2.height / 2;
@@ -421,7 +459,6 @@ function reset() {
 }
 
 function stop() {
-  console.log("STOP");
     cancelAnimationFrame(anim);
     reset();
     // Init score
